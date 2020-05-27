@@ -146,6 +146,7 @@ static void config__init_reload(struct mosquitto_db *db, struct mosquitto__confi
 	config->security_options.allow_zero_length_clientid = true;
 	config->security_options.auto_id_prefix = NULL;
 	config->security_options.auto_id_prefix_len = 0;
+	config->allow_sys_update = false;
 
 	mosquitto__free(config->security_options.password_file);
 	config->security_options.password_file = NULL;
@@ -653,7 +654,7 @@ int config__read(struct mosquitto_db *db, struct mosquitto__config *config, bool
 				}
 
 				/* Check plugins loaded to see if they have username/password checks enabled */
-				for(j=0; j<config->listeners[i].security_options.auth_plugin_config_count; j++){ 
+				for(j=0; j<config->listeners[i].security_options.auth_plugin_config_count; j++){
 					plugin = &config->listeners[i].security_options.auth_plugin_configs[j].plugin;
 
 					if(plugin->version == 3 || plugin->version == 2){
@@ -685,7 +686,7 @@ int config__read(struct mosquitto_db *db, struct mosquitto__config *config, bool
 			}
 
 			/* Check plugins loaded to see if they have username/password checks enabled */
-			for(j=0; j<config->security_options.auth_plugin_config_count; j++){ 
+			for(j=0; j<config->security_options.auth_plugin_config_count; j++){
 				plugin = &config->security_options.auth_plugin_configs[j].plugin;
 
 				if(plugin->version == 3 || plugin->version == 2){
@@ -863,6 +864,8 @@ int config__read_file_core(struct mosquitto__config *config, bool reload, struct
 				}else if(!strcmp(token, "allow_zero_length_clientid")){
 					conf__set_cur_security_options(config, cur_listener, &cur_security_options);
 					if(conf__parse_bool(&token, "allow_zero_length_clientid", &cur_security_options->allow_zero_length_clientid, saveptr)) return MOSQ_ERR_INVAL;
+				}else if(!strcmp(token, "allow_sys_update")){
+					if(conf__parse_bool(&token, "allow_sys_update", &config->allow_sys_update, saveptr)) return MOSQ_ERR_INVAL;
 				}else if(!strncmp(token, "auth_opt_", 9)){
 					if(reload) continue; /* Auth plugin not currently valid for reloading. */
 					if(!cur_auth_plugin_config){
@@ -2033,7 +2036,7 @@ int config__read_file_core(struct mosquitto__config *config, bool reload, struct
 										log__printf(NULL, MOSQ_LOG_ERR, "Error: Invalid bridge topic local prefix and pattern combination '%s'.", cur_topic->local_prefix);
 										return MOSQ_ERR_INVAL;
 									}
-									
+
 									/* Print just the prefix for storage */
 									snprintf(cur_topic->local_prefix, strlen(cur_topic->topic) + strlen(token)+1,
 											"%s", token);
@@ -2062,7 +2065,7 @@ int config__read_file_core(struct mosquitto__config *config, bool reload, struct
 													cur_topic->remote_prefix);
 											return MOSQ_ERR_INVAL;
 										}
-									
+
 										/* Print just the prefix for storage */
 										snprintf(cur_topic->remote_prefix, strlen(cur_topic->topic) + strlen(token)+1,
 												"%s", token);
