@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 Tifaifai Maupiti <tifaifai.maupiti@gmail.com>
+Copyright (c) 2017-2020 Tifaifai Maupiti <tifaifai.maupiti@gmail.com>
 
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the Eclipse Public License v1.0
@@ -53,6 +53,7 @@ int mux_epoll__add_in(struct mosquitto_db *db, struct mosquitto *context)
 	if (epoll_ctl(db->epollfd, EPOLL_CTL_ADD, context->sock, &ev) == -1) {
 		log__printf(NULL, MOSQ_LOG_ERR, "Error in epoll accepting: %s", strerror(errno));
 	}
+	context->events = EPOLLIN;
 	return MOSQ_ERR_SUCCESS;
 }
 
