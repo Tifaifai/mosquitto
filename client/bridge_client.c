@@ -169,7 +169,6 @@ int show_bridges_json(struct bridge_list* bridges){
 void my_message_callback(struct mosquitto *mosq, void *obj, const struct mosquitto_message *message, const mosquitto_property *properties)
 {
   UNUSED(properties);
-  int rc = 0;
   struct bridge_list *bridges;
   bridges = (struct bridge_list*) obj;
   int valid_erase = 0;
@@ -188,7 +187,7 @@ void my_message_callback(struct mosquitto *mosq, void *obj, const struct mosquit
         exit(-1);
       }
       bridges->bridge[bridges->bridge_list_count-1].name = strdup(message->topic);
-      rc = show_bridges_json(bridges);
+      show_bridges_json(bridges);
     }else{
       if(bridges->bridge_list_count>0){
         for (i = 0; i < bridges->bridge_list_count; i++) {
@@ -207,7 +206,7 @@ void my_message_callback(struct mosquitto *mosq, void *obj, const struct mosquit
             printf("Error: Out of memory. 3\n");
             exit(-1);
           }
-          rc = show_bridges_json(bridges);
+          show_bridges_json(bridges);
         }
       }else{
         bridges->bridge_list_count = 0;
@@ -420,7 +419,7 @@ int main(int argc, char *argv[])
     if(bridge_shared_init()) goto cleanup;
   }
 	if(cfg.bridgeType == BRIDGE_NEW){
-			topic = strdup("$SYS/broker/bridge/new");
+			topic = strdup("$BRIDGE/new");
 			name = cfg.bridge.name;
 			pattern = cfg.bridge.topics[0].topic;
 			qos = cfg.bridge.topics[0].qos;
@@ -469,7 +468,7 @@ int main(int argc, char *argv[])
       cfg.topic = strdup(topic);
 			printf("Message New Bridge (%d):\n%s\n", cfg.msglen, cfg.message);
 	}else if(cfg.bridgeType == BRIDGE_DEL){
-			topic = strdup("$SYS/broker/bridge/del");
+			topic = strdup("$BRIDGE/del");
 			name = cfg.bridge.name;
       if(cfg.bridge_conf_json == CONF_JSON){
         msg_json_len = snprintf(NULL,0,"{\"connection\":\"%s\"}", name);

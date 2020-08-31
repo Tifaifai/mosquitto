@@ -297,16 +297,19 @@ int handle__publish(struct mosquitto_db *db, struct mosquitto *context)
 		return rc;
 	}
 
+	log__printf(NULL, MOSQ_LOG_DEBUG, "Received PUBLISH from %s (d%d, q%d, r%d, m%d, '%s', ... (%ld bytes))", context->id, dup, qos, retain, mid, topic, (long)payloadlen);
+
 	/* Check if demand concern bridge dynamic */
-	if(db->config->allow_sys_update){
-		rc = bridge__dynamic_analyse(db, topic, UHPA_ACCESS(payload, payloadlen), payloadlen);
-		if(rc == MOSQ_ERR_BRIDGE_DYNA ){
-			log__printf(NULL, MOSQ_LOG_DEBUG, "PUBLISH Invalid bridge dynamic configuration.");
-			rc = 0; /* To not disturbe normal publish management */
-		}
+	if(!strncmp(topic, "$BRIDGE/", 8)){
+	  if(db->config->allow_sys_update){
+		  rc = bridge__dynamic_analyse(db, topic, UHPA_ACCESS(payload, payloadlen), payloadlen);
+		  if(rc == MOSQ_ERR_BRIDGE_DYNA ){
+			  log__printf(NULL, MOSQ_LOG_DEBUG, "PUBLISH Invalid bridge dynamic configuration on $BRIDGE.");
+			  rc = 0; /* To not disturbe normal publish management */
+		  }
+	  }
 	}
 
-	log__printf(NULL, MOSQ_LOG_DEBUG, "Received PUBLISH from %s (d%d, q%d, r%d, m%d, '%s', ... (%ld bytes))", context->id, dup, qos, retain, mid, topic, (long)payloadlen);
 	if(qos > 0){
 		db__message_store_find(context, mid, &stored);
 	}

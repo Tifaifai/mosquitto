@@ -68,7 +68,7 @@ int bridge__dynamic_analyse(struct mosquitto_db *db, char *topic, void* payload,
 	index = (int*) mosquitto__malloc(sizeof(int));
 	*index = -1;
 
-	if(strncmp("$SYS/broker/bridge/new",topic,22)==0){
+	if(strncmp("$BRIDGE/new",topic, 11)==0){
 		rc = bridge__dynamic_parse_payload_new_json(db, payload, &config);
 		if(rc != 0){
 			log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to parse PUBLISH for bridge dynamic.");
@@ -92,7 +92,7 @@ int bridge__dynamic_analyse(struct mosquitto_db *db, char *topic, void* payload,
 					config.bridges[config.bridge_count-1].name);
 			mux_epoll__add_in(db, db->bridges[db->bridge_count-1]);
 		}
-	}else if(strncmp("$SYS/broker/bridge/del", topic,22)==0){
+	}else if(strncmp("$BRIDGE/del", topic, 11)==0){
 		rc = bridge__dynamic_parse_payload_del_json(payload,db,index);
 		if(rc != 0){
 			log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to parse PUBLISH for bridge dynamic.");

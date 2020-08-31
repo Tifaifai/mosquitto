@@ -597,17 +597,6 @@ static int acl__check_dollar(struct mosquitto_db *db, const char *topic, int acc
 
 	if(!strncmp(topic, "$SYS", 4)){
 		if(access == MOSQ_ACL_WRITE){
-			/* Check if demand concern bridge dynamic */
-			if(db->config->allow_sys_update){
-				if((strncmp("$SYS/broker/bridge/new",topic,22))==0){
-					log__printf(NULL, MOSQ_LOG_DEBUG, "Bridge New");
-				  return MOSQ_ERR_SUCCESS;
-				}
-				if((strncmp("$SYS/broker/bridge/del",topic,22))==0) {
-					log__printf(NULL, MOSQ_LOG_DEBUG, "Bridge Del");
-					return MOSQ_ERR_SUCCESS;
-				}
-			}
 			/* Potentially allow write access for bridge status, otherwise explicitly deny. */
 			rc = mosquitto_topic_matches_sub("$SYS/broker/connection/+/state", topic, &match);
 			if(rc == MOSQ_ERR_SUCCESS && match == true){
@@ -625,6 +614,18 @@ static int acl__check_dollar(struct mosquitto_db *db, const char *topic, int acc
 			return MOSQ_ERR_SUCCESS;
 		}else{
 			return MOSQ_ERR_ACL_DENIED;
+		}
+	}else if(!strncmp(topic, "$BRIDGE", 7)){
+		/* Check if demand concern bridge dynamic */
+		if(db->config->allow_sys_update){
+			if((strncmp("$BRIDGE/new",topic,11))==0){
+				log__printf(NULL, MOSQ_LOG_DEBUG, "Bridge New");
+				return MOSQ_ERR_SUCCESS;
+			}
+			if((strncmp("$BRIDGE/del",topic,11))==0) {
+				log__printf(NULL, MOSQ_LOG_DEBUG, "Bridge Del");
+				return MOSQ_ERR_SUCCESS;
+			}
 		}
 	}else{
 		/* This is an unknown $ topic, for the moment just defer to actual tests. */

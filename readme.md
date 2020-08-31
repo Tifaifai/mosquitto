@@ -41,9 +41,14 @@ Then use `mosquitto_sub` to subscribe to a topic:
 And to publish a message:
 
     mosquitto_pub -t 'test/topic' -m 'hello world'
+
 ## To dynamically create/delete/show a bridge, use:
 
 Set allow_sys_update with true value in mosquitto.conf file.
+
+Mosquitto broker implement SYS-Topics. All SYS-Topics start $SYS and are read-only for MQTT clients.
+To dynamically create or delete a bridge, mosquitto use new topics: BRIDGE-Topics.
+All BRIDGE-Topics start with $BRIDGE and are read-write with ACL Protection.
 
 Create Bridge:
 
@@ -55,13 +60,13 @@ Create Bridge:
 
     or via publish message to create a bridge:
 
-    mosquitto_pub -h 127.0.0.1 -p 1883 -t '$SYS/broker/bridge/new' -m 'connection testBridge
+    mosquitto_pub -h 127.0.0.1 -p 1883 -t '$BRIDGE/new' -m 'connection testBridge
     address 127.0.0.1:1884
     topic # both 0 test/1883/ test/1884/
     '
 
     with json format:
-    mosquitto_pub -h 127.0.0.1 -p 1883 -t '$SYS/broker/bridge/new' -m '{"bridges":[{"connection":"testBridge","addresses":[{"address":"127.0.0.1","port":1884}],"topic":"#","direction":"both","qos":0,"local_prefix":"test/1883/","remote_prefix":"test/1884/"}]}'
+    mosquitto_pub -h 127.0.0.1 -p 1883 -t '$BRIDGE/new' -m '{"bridges":[{"connection":"testBridge","addresses":[{"address":"127.0.0.1","port":1884}],"topic":"#","direction":"both","qos":0,"local_prefix":"test/1883/","remote_prefix":"test/1884/"}]}'
 
 Delete Bridge:
 
@@ -72,10 +77,10 @@ Delete Bridge:
 
     or via publish message to delete a bridge:
 
-    mosquitto_pub -h 127.0.0.1 -p 1883 -t '$SYS/broker/bridge/del' -m 'connection testBridge'
+    mosquitto_pub -h 127.0.0.1 -p 1883 -t '$BRIDGE/del' -m 'connection testBridge'
 
     with json format:
-    mosquitto_pub -h 127.0.0.1 -p 1883 -t '$SYS/broker/bridge/del' -m '{"connection":"testBridge"}'
+    mosquitto_pub -h 127.0.0.1 -p 1883 -t '$BRIDGE/del' -m '{"connection":"testBridge"}'
 
     Show all Bridges:
 
